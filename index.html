@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مدیریت انبار لوازم یدکی</title>
+<style>
+body{font-family:Tahoma;background:#f1f4f8;margin:0;padding:15px;color:#222}
+header{background:#123c65;color:white;padding:20px;border-radius:12px;text-align:center}
+.box{background:white;padding:15px;margin-top:15px;border-radius:12px}
+input,button{padding:12px;margin:5px 0;width:100%;box-sizing:border-box;border-radius:7px;border:1px solid #ccc;font-size:15px}
+button{background:#1769aa;color:white;border:0;font-weight:bold}
+.delete{background:#c62828}
+table{width:100%;border-collapse:collapse;font-size:12px}
+td,th{padding:8px;border-bottom:1px solid #ddd;text-align:center}
+.scroll{overflow-x:auto}
+</style>
+</head>
+<body>
+<header>
+<h2>انبارداری لوازم یدکی خودرو</h2>
+<p>مدیریت کالا و موجودی فروشگاه</p>
+</header>
+<div class="box">
+<h3>ثبت کالای جدید</h3>
+<input id="name" placeholder="نام قطعه">
+<input id="code" placeholder="کد کالا">
+<input id="buy" type="number" placeholder="قیمت خرید (تومان)">
+<input id="sell" type="number" placeholder="قیمت فروش (تومان)">
+<input id="qty" type="number" placeholder="تعداد موجودی">
+<button onclick="add()">ثبت کالا</button>
+</div>
+<div class="box">
+<h3>جستجوی کالا</h3>
+<input id="search" placeholder="نام یا کد قطعه..." oninput="show()">
+<h3>گزارش انبار</h3>
+<p id="total">تعداد کالا: ۰</p>
+<div class="scroll">
+<table>
+<thead><tr><th>نام</th><th>کد</th><th>خرید</th><th>فروش</th><th>موجودی</th><th>حذف</th></tr></thead>
+<tbody id="list"></tbody>
+</table>
+</div>
+</div>
+<script>
+let items=JSON.parse(localStorage.getItem("parts")||"[]");
+function save(){localStorage.setItem("parts",JSON.stringify(items))}
+function add(){
+let n=document.getElementById("name").value.trim();
+let c=document.getElementById("code").value.trim();
+let b=Number(document.getElementById("buy").value);
+let s=Number(document.getElementById("sell").value);
+let q=Number(document.getElementById("qty").value);
+if(!n||!c||!document.getElementById("buy").value||!document.getElementById("sell").value||!document.getElementById("qty").value){alert("همه قسمت‌ها را پر کنید");return}
+if(items.some(x=>x.code===c)){alert("این کد قبلاً ثبت شده");return}
+items.push({name:n,code:c,buy:b,sell:s,qty:q});
+save();show();
+["name","code","buy","sell","qty"].forEach(x=>document.getElementById(x).value="");
+}
+function show(){
+let term=document.getElementById("search").value.toLowerCase();
+let rows=items.filter(x=>x.name.toLowerCase().includes(term)||x.code.toLowerCase().includes(term));
+document.getElementById("list").innerHTML=rows.map(x=>`<tr><td>${x.name}</td><td>${x.code}</td><td>${x.buy.toLocaleString("fa-IR")}</td><td>${x.sell.toLocaleString("fa-IR")}</td><td>${x.qty}</td><td><button class="delete" onclick="removeItem('${x.code}')">حذف</button></td></tr>`).join("");
+document.getElementById("total").innerText="تعداد انواع کالا: "+items.length;
+}
+function removeItem(code){
+if(confirm("کالا حذف شود؟")){items=items.filter(x=>x.code!==code);save();show()}
+}
+show();
+</script>
+</body>
+</html>
